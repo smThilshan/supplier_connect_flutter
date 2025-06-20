@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:supplier_connect_flutter/providers/supplier_provider.dart';
 import '../widgets/my_textbox.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -95,6 +97,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     // Navigator.pushNamed(context, '/signup');
                                     // Navigator.pushNamed(
                                     //     context, HomeScreen.routeName);
+                                    Provider.of<SupplierProvider>(context,
+                                            listen: false)
+                                        .fetchSuppliers();
                                   },
                                   style: ElevatedButton.styleFrom(
                                     foregroundColor: Colors.white,
