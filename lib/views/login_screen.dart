@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supplier_connect_flutter/providers/supplier_provider.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/my_textbox.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = 'login_screen';
@@ -92,14 +94,56 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               SizedBox(
                                 width: double.infinity,
+                                // child: ElevatedButton(
+                                //   onPressed: () {
+                                //     // Navigator.pushNamed(context, '/signup');
+                                //     // Navigator.pushNamed(
+                                //     //     context, HomeScreen.routeName);
+                                //     Provider.of<SupplierProvider>(context,
+                                //             listen: false)
+                                //         .fetchSuppliers();
+                                //   },
+                                //   style: ElevatedButton.styleFrom(
+                                //     foregroundColor: Colors.white,
+                                //     backgroundColor: Colors.blue.shade400,
+                                //     padding: const EdgeInsets.all(13),
+                                //     shape: RoundedRectangleBorder(
+                                //       borderRadius: BorderRadius.circular(25),
+                                //     ),
+                                //   ),
+                                //   child: const Text(
+                                //     'Login',
+                                //     style: TextStyle(
+                                //       fontFamily: 'OpenSans',
+                                //       fontSize: 16,
+                                //       fontWeight: FontWeight.bold,
+                                //     ),
+                                //   ),
+                                // ),
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    // Navigator.pushNamed(context, '/signup');
-                                    // Navigator.pushNamed(
-                                    //     context, HomeScreen.routeName);
-                                    Provider.of<SupplierProvider>(context,
-                                            listen: false)
-                                        .fetchSuppliers();
+                                  onPressed: () async {
+                                    if (__loginFormKey.currentState!
+                                        .validate()) {
+                                      final authProvider =
+                                          Provider.of<AuthProvider>(context,
+                                              listen: false);
+
+                                      bool success = await authProvider.login(
+                                          email.text.trim(),
+                                          password.text.trim());
+
+                                      if (success) {
+                                        context.go('/suppliers');
+                                      } else {
+                                        // ⚡️ Show error
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content: Text(
+                                                  'Invalid email or password!')),
+                                        );
+                                      }
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     foregroundColor: Colors.white,
