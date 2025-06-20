@@ -1,149 +1,117 @@
-// import 'package:flutter/material.dart';
-// import 'package:provider/provider.dart';
-// import '../providers/supplier_provider.dart';
-// import '../models/supplier.dart';
-// import '../widgets/supplier_card.dart'; // Optional for cleaner UI
-
-// class SupplierListScreen extends StatefulWidget {
-//   @override
-//   _SupplierListScreenState createState() => _SupplierListScreenState();
-// }
-
-// class _SupplierListScreenState extends State<SupplierListScreen> {
-//   @override
-//   void initState() {
-//     super.initState();
-//     Provider.of<SupplierProvider>(context, listen: false).fetchSuppliers('test_token_12345');
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final provider = Provider.of<SupplierProvider>(context);
-
-//     return Scaffold(
-//       appBar: AppBar(title: Text('Suppliers')),
-//       body: provider.isLoading
-//           ? Center(child: CircularProgressIndicator())
-//           : provider.error != null
-//               ? Center(child: Text('Error: ${provider.error}'))
-//               : ListView.builder(
-//                   itemCount: provider.suppliers.length,
-//                   itemBuilder: (context, index) {
-//                     Supplier supplier = provider.suppliers[index];
-//                     return ListTile(
-//                       leading: supplier.logoUrl != null
-//                           ? Image.network(supplier.logoUrl!, width: 40)
-//                           : Icon(Icons.store),
-//                       title: Text(supplier.name),
-//                       subtitle: Text("Rating: ${supplier.rating}"),
-//                       onTap: () {
-//                         Navigator.pushNamed(
-//                           context,
-//                           '/supplier-details',
-//                           arguments: supplier.id,
-//                         );
-//                       },
-//                     );
-//                   },
-//                 ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/supplier.dart';
+import '../providers/supplier_provider.dart';
 
-class SupplierListScreen extends StatelessWidget {
-  final List<Map<String, dynamic>> dummySuppliers = [
-    {
-      'id': 1,
-      'name': 'Fresh Foods Co.',
-      'logoUrl': null,
-      'rating': 4.5,
-      'categories': ['Fruits', 'Vegetables']
-    },
-    {
-      'id': 2,
-      'name': 'Dairy Delight',
-      'logoUrl': null,
-      'rating': 4.2,
-      'categories': ['Milk', 'Cheese']
-    },
-    {
-      'id': 3,
-      'name': 'Bakers Hub',
-      'logoUrl': null,
-      'rating': 4.8,
-      'categories': ['Bread', 'Pastry']
-    },
-  ];
+class SupplierListScreen extends StatefulWidget {
+  const SupplierListScreen({super.key});
+
+  @override
+  State<SupplierListScreen> createState() => _SupplierListScreenState();
+}
+
+class _SupplierListScreenState extends State<SupplierListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // IMPORTANT: Defer the call until after the first build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<SupplierProvider>(context, listen: false).fetchSuppliers();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final supplierProvider = Provider.of<SupplierProvider>(context);
+
+    if (supplierProvider.isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Suppliers')),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (supplierProvider.error != null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Suppliers')),
+        body: Center(child: Text('Error: ${supplierProvider.error}')),
+      );
+    }
+
+    final List<Supplier> suppliers = supplierProvider.suppliers;
+
     return Scaffold(
+      appBar: AppBar(title: const Text('Suppliers')),
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(title: Text('Suppliers')),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: dummySuppliers.length,
-        itemBuilder: (context, index) {
-          final supplier = dummySuppliers[index];
-          return GestureDetector(
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Clicked on ${supplier['name']}')),
-              );
-            },
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 3,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    // Placeholder for logo
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Colors.teal[100],
-                      child:
-                          Icon(Icons.store, color: Colors.teal[800], size: 30),
+      body: suppliers.isEmpty
+          ? const Center(child: Text('No suppliers available'))
+          : ListView.builder(
+              padding: const EdgeInsets.all(16.0),
+              itemCount: suppliers.length,
+              itemBuilder: (context, index) {
+                final supplier = suppliers[index];
+                return GestureDetector(
+                  onTap: () {
+                    // Navigate to details screen
+                  },
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    SizedBox(width: 16),
-                    // Supplier Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    elevation: 3,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
                         children: [
-                          Text(
-                            supplier['name'],
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                          CircleAvatar(
+                            radius: 30,
+                            backgroundColor: Colors.teal[100],
+                            child: supplier.logoUrl != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(30),
+                                    child: Image.network(
+                                      supplier.logoUrl!,
+                                      fit: BoxFit.cover,
+                                      height: 60,
+                                      width: 60,
+                                    ),
+                                  )
+                                : const Icon(Icons.store,
+                                    color: Colors.teal, size: 30),
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Rating: ${supplier['rating']} ★',
-                            style: TextStyle(
-                                fontSize: 14, color: Colors.orange[700]),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(supplier.name,
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 4),
+                                Text('Rating: ${supplier.rating} ★',
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.orange[700])),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Categories: ${supplier.categories.join(', ')}',
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.grey[600]),
+                                ),
+                              ],
+                            ),
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Categories: ${supplier['categories'].join(', ')}',
-                            style: TextStyle(
-                                fontSize: 14, color: Colors.grey[600]),
-                          ),
+                          const Icon(Icons.arrow_forward_ios,
+                              color: Colors.teal),
                         ],
                       ),
                     ),
-                    Icon(Icons.arrow_forward_ios, color: Colors.teal),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }
