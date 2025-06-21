@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/order_provider.dart';
 import '../models/order.dart';
 
 class CartScreen extends StatelessWidget {
-  const CartScreen({super.key});
+  final int supplierId;
+  const CartScreen({super.key, required this.supplierId});
 
   @override
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
     final orderProvider = Provider.of<OrderProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     final cartItems = cartProvider.items;
 
@@ -107,8 +110,15 @@ class CartScreen extends StatelessWidget {
                                       ))
                                   .toList();
 
+                              // final success = await orderProvider.placeOrder(
+                              //     orderItems, totalAmount);
                               final success = await orderProvider.placeOrder(
-                                  orderItems, totalAmount);
+                                userId: authProvider.userId!,
+                                supplierId:
+                                    supplierId, // Get this from your screen
+                                items: orderItems,
+                                totalPrice: totalAmount,
+                              );
 
                               if (success) {
                                 cartProvider.clearCart();

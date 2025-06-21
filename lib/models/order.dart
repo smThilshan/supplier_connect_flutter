@@ -45,14 +45,14 @@ class OrderItem {
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
-      productId: json['productId'],
+      productId: json['product_id'],
       quantity: json['quantity'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'productId': productId,
+      'product_id': productId,
       'quantity': quantity,
     };
   }

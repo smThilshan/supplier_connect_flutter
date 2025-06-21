@@ -45,13 +45,8 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Suppliers'),
-          leading: IconButton(
-            icon: Icon(Icons.card_travel),
-            onPressed: () {
-              context.push('/cart');
-            },
-          )),
+        title: const Text('Suppliers'),
+      ),
       backgroundColor: Colors.grey[100],
       body: suppliers.isEmpty
           ? const Center(child: Text('No suppliers available'))
