@@ -1,15 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supplier_connect_flutter/services/api_service.dart';
 
-// class AuthProvider extends ChangeNotifier {
-//   // Add your supplier-related properties and methods here
-//   // For example:
-//   List<String> _suppliers = [];
-
-//   List<String> get suppliers => _suppliers;
-// }
-
-// auth_provider.dart
 class AuthProvider with ChangeNotifier {
   bool isLoading = false;
 

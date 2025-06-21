@@ -1,34 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/cart_provider.dart';
+import '../providers/order_provider.dart';
+import '../models/order.dart';
 
 class CartScreen extends StatelessWidget {
-  final List<Map<String, dynamic>> cartItems = [
-    {
-      'id': 101,
-      'name': 'Apple',
-      'price': 1.25,
-      'quantity': 3,
-    },
-    {
-      'id': 102,
-      'name': 'Banana',
-      'price': 0.99,
-      'quantity': 2,
-    },
-  ];
-
-  double get totalAmount {
-    return cartItems.fold(
-        0, (sum, item) => sum + item['price'] * item['quantity']);
-  }
+  const CartScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cartProvider = Provider.of<CartProvider>(context);
+    final orderProvider = Provider.of<OrderProvider>(context);
+
+    final cartItems = cartProvider.items;
+
+    double totalAmount = cartItems.fold(
+      0,
+      (sum, item) => sum + item.product.price * item.quantity,
+    );
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Your Cart'),
+        title: const Text('Your Cart'),
       ),
       body: cartItems.isEmpty
-          ? Center(child: Text('Your cart is empty'))
+          ? const Center(child: Text('Your cart is empty'))
           : Column(
               children: [
                 Expanded(
@@ -37,26 +33,34 @@ class CartScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final item = cartItems[index];
                       return Card(
-                        margin:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         child: ListTile(
-                          title: Text(item['name']),
+                          leading: item.product.imageUrl != null
+                              ? Image.network(
+                                  item.product.imageUrl!,
+                                  height: 50,
+                                  width: 50,
+                                  fit: BoxFit.cover,
+                                )
+                              : const Icon(Icons.image_not_supported),
+                          title: Text(item.product.name),
                           subtitle: Text(
-                              '\$${item['price'].toStringAsFixed(2)} each'),
+                              '\$${item.product.price.toStringAsFixed(2)} each'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: Icon(Icons.remove_circle_outline),
+                                icon: const Icon(Icons.remove_circle_outline),
                                 onPressed: () {
-                                  // TODO: decrease quantity logic
+                                  cartProvider.decreaseQuantity(item.product);
                                 },
                               ),
-                              Text('${item['quantity']}'),
+                              Text('${item.quantity}'),
                               IconButton(
-                                icon: Icon(Icons.add_circle_outline),
+                                icon: const Icon(Icons.add_circle_outline),
                                 onPressed: () {
-                                  // TODO: increase quantity logic
+                                  cartProvider.increaseQuantity(item.product);
                                 },
                               ),
                             ],
@@ -67,11 +71,11 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Total:',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
@@ -81,23 +85,48 @@ class CartScreen extends StatelessWidget {
                         style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.green[700]),
+                            color: Colors.green),
                       ),
                     ],
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // TODO: place order API call
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Order placed!')),
-                        );
-                      },
-                      child: Text('Place Order'),
+                      onPressed: orderProvider.isPlacingOrder
+                          ? null
+                          : () async {
+                              // Convert cart items to List<OrderItem>
+                              final orderItems = cartItems
+                                  .map((item) => OrderItem(
+                                        productId: item.product.id,
+                                        quantity: item.quantity,
+                                      ))
+                                  .toList();
+
+                              final success = await orderProvider.placeOrder(
+                                  orderItems, totalAmount);
+
+                              if (success) {
+                                cartProvider.clearCart();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Order placed successfully!')),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Order failed!')),
+                                );
+                              }
+                            },
+                      child: orderProvider.isPlacingOrder
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text('Place Order'),
                     ),
                   ),
                 ),

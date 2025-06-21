@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../models/supplier.dart';
 import '../providers/supplier_provider.dart';
@@ -33,7 +34,9 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
 
     if (supplierProvider.error != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Suppliers')),
+        appBar: AppBar(
+          title: const Text('Suppliers'),
+        ),
         body: Center(child: Text('Error: ${supplierProvider.error}')),
       );
     }
@@ -41,7 +44,14 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
     final List<Supplier> suppliers = supplierProvider.suppliers;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Suppliers')),
+      appBar: AppBar(
+          title: const Text('Suppliers'),
+          leading: IconButton(
+            icon: Icon(Icons.card_travel),
+            onPressed: () {
+              context.push('/cart');
+            },
+          )),
       backgroundColor: Colors.grey[100],
       body: suppliers.isEmpty
           ? const Center(child: Text('No suppliers available'))
@@ -52,7 +62,8 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                 final supplier = suppliers[index];
                 return GestureDetector(
                   onTap: () {
-                    // Navigate to details screen
+                    // context.push('/supplier_details', extra: supplier.id);
+                    context.push('/suppliers/details/${supplier.id}');
                   },
                   child: Card(
                     shape: RoundedRectangleBorder(

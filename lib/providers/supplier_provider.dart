@@ -1,40 +1,57 @@
-import 'package:flutter/material.dart';
-import 'package:supplier_connect_flutter/services/api_service.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../models/supplier.dart';
 import '../services/api_service.dart';
 
 class SupplierProvider with ChangeNotifier {
-  List<Supplier> _suppliers = [];
-  bool _isLoading = false;
-  String? _error;
+  bool isLoading = false;
+  String? error;
+  List<Supplier> suppliers = [];
+  Supplier? currentSupplier;
 
-  List<Supplier> get suppliers => _suppliers;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
-
+  // Already have this for listing suppliers
   Future<void> fetchSuppliers() async {
-    _isLoading = true;
-    _error = null;
+    isLoading = true;
+    error = null;
     notifyListeners();
 
     try {
       final response = await ApiService.getRequest('suppliers');
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List suppliersData = data is List ? data : data['suppliers'];
-        _suppliers = suppliersData
-            .map((supplier) => Supplier.fromJson(supplier))
-            .toList();
+        final List data = jsonDecode(response.body);
+        suppliers = data.map((item) => Supplier.fromJson(item)).toList();
       } else {
-        _error = 'Error: ${response.statusCode}';
+        error = 'Failed to load suppliers';
       }
     } catch (e) {
-      _error = 'Exception: $e';
+      error = e.toString();
     }
 
-    _isLoading = false;
+    isLoading = false;
+    notifyListeners();
+  }
+
+  // NEW METHOD
+  Future<void> fetchSupplierDetails(int id) async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      final response = await ApiService.getRequest('suppliers/$id');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        currentSupplier = Supplier.fromJson(data);
+      } else {
+        error = 'Failed to load supplier details';
+      }
+    } catch (e) {
+      error = e.toString();
+    }
+
+    isLoading = false;
     notifyListeners();
   }
 }

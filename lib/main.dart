@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supplier_connect_flutter/providers/cart_provider.dart';
+import 'package:supplier_connect_flutter/providers/order_provider.dart';
 import 'package:supplier_connect_flutter/views/cart_screen.dart';
 import 'package:supplier_connect_flutter/views/login_screen.dart';
 import 'package:supplier_connect_flutter/views/order_success_screen.dart';
@@ -26,19 +28,16 @@ final GoRouter _router = GoRouter(
       name: 'suppliers',
       builder: (context, state) => SupplierListScreen(),
       routes: [
-        // GoRoute(
-        // path: 'details/:id',
-        // name: 'supplier_details',
-        // builder: (context, state) {
-        //   final id = state.params['id']!;
-        //   return SupplierDetailsScreen(supplierId: id);
-        // },
-        // ),
+        // Route for supplier details
         GoRoute(
-          path: 'cart',
-          name: 'cart',
-          builder: (context, state) => CartScreen(),
+          path: 'details/:id',
+          name: 'supplier_details',
+          builder: (context, state) {
+            final id = int.parse(state.pathParameters['id']!);
+            return SupplierDetailScreen(supplierId: id);
+          },
         ),
+
         // GoRoute(
         //   path: 'order_success',
         //   name: 'order_success',
@@ -53,6 +52,12 @@ final GoRouter _router = GoRouter(
         // ),
       ],
     ),
+    // Move /cart here as a top-level route:
+    GoRoute(
+      path: '/cart',
+      name: 'cart',
+      builder: (context, state) => CartScreen(),
+    ),
   ],
 );
 
@@ -66,6 +71,8 @@ class MyApp extends StatelessWidget {
         providers: [
           ChangeNotifierProvider(create: (_) => SupplierProvider()),
           ChangeNotifierProvider(create: (_) => AuthProvider()),
+          ChangeNotifierProvider(create: (_) => CartProvider()),
+          ChangeNotifierProvider(create: (_) => OrderProvider()),
         ],
         child: MaterialApp.router(
           title: 'Supplier Connect',

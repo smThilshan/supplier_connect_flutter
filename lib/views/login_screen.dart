@@ -94,32 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               SizedBox(
                                 width: double.infinity,
-                                // child: ElevatedButton(
-                                //   onPressed: () {
-                                //     // Navigator.pushNamed(context, '/signup');
-                                //     // Navigator.pushNamed(
-                                //     //     context, HomeScreen.routeName);
-                                //     Provider.of<SupplierProvider>(context,
-                                //             listen: false)
-                                //         .fetchSuppliers();
-                                //   },
-                                //   style: ElevatedButton.styleFrom(
-                                //     foregroundColor: Colors.white,
-                                //     backgroundColor: Colors.blue.shade400,
-                                //     padding: const EdgeInsets.all(13),
-                                //     shape: RoundedRectangleBorder(
-                                //       borderRadius: BorderRadius.circular(25),
-                                //     ),
-                                //   ),
-                                //   child: const Text(
-                                //     'Login',
-                                //     style: TextStyle(
-                                //       fontFamily: 'OpenSans',
-                                //       fontSize: 16,
-                                //       fontWeight: FontWeight.bold,
-                                //     ),
-                                //   ),
-                                // ),
                                 child: ElevatedButton(
                                   onPressed: () async {
                                     if (__loginFormKey.currentState!

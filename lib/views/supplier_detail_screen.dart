@@ -1,135 +1,122 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/supplier.dart';
+import '../models/product.dart';
+import '../providers/supplier_provider.dart';
+import '../providers/cart_provider.dart';
 
-class SupplierDetailsScreen extends StatelessWidget {
-  final Map<String, dynamic> supplier = {
-    'id': 1,
-    'name': 'Fresh Foods Co.',
-    'logoUrl': null,
-    'rating': 4.5,
-    'categories': ['Fruits', 'Vegetables'],
-    'products': [
-      {
-        'id': 101,
-        'name': 'Apple',
-        'imageUrl': null,
-        'price': 1.25,
-      },
-      {
-        'id': 102,
-        'name': 'Banana',
-        'imageUrl': null,
-        'price': 0.99,
-      },
-      {
-        'id': 103,
-        'name': 'Carrot',
-        'imageUrl': null,
-        'price': 0.89,
-      },
-    ],
-  };
+class SupplierDetailScreen extends StatefulWidget {
+  static const routeName = '/supplier_details';
+  final int supplierId;
+
+  const SupplierDetailScreen({super.key, required this.supplierId});
+
+  @override
+  State<SupplierDetailScreen> createState() => _SupplierDetailScreenState();
+}
+
+class _SupplierDetailScreenState extends State<SupplierDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Trigger fetching supplier details
+    Provider.of<SupplierProvider>(context, listen: false)
+        .fetchSupplierDetails(widget.supplierId);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final supplierProvider = Provider.of<SupplierProvider>(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(supplier['name']),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Supplier Info Card
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+      appBar: AppBar(title: const Text('Supplier Details')),
+      body: supplierProvider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : supplierProvider.error != null
+              ? Center(child: Text('Error: ${supplierProvider.error}'))
+              : supplierProvider.currentSupplier == null
+                  ? const Center(child: Text('No details available'))
+                  : _buildSupplierDetail(supplierProvider.currentSupplier!),
+    );
+  }
+
+  Widget _buildSupplierDetail(Supplier supplier) {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // Supplier Info
+        CircleAvatar(
+          radius: 40,
+          backgroundColor: Colors.teal[100],
+          child: supplier.logoUrl != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(40),
+                  child: Image.network(supplier.logoUrl!,
+                      fit: BoxFit.cover, height: 80, width: 80),
+                )
+              : Icon(Icons.store, color: Colors.teal[800], size: 40),
+        ),
+        const SizedBox(height: 12),
+        Text(supplier.name,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        Text(
+            'Rating: ${supplier.rating.toStringAsFixed(1)} ★ | Categories: ${supplier.categories.join(', ')}'),
+        const SizedBox(height: 16),
+        const Text('Products',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+
+        // Products List
+        supplier.products.isEmpty
+            ? Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('No products available'),
+              )
+            : ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: supplier.products.length,
+                itemBuilder: (context, index) {
+                  final product = supplier.products[index];
+                  // Use _buildProductItem which has the "Add" button
+                  return _buildProductItem(product);
+                },
               ),
-              elevation: 3,
-              margin: EdgeInsets.only(bottom: 16),
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.teal[100],
-                      child:
-                          Icon(Icons.store, size: 40, color: Colors.teal[800]),
-                    ),
-                    SizedBox(width: 20),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            supplier['name'],
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Rating: ${supplier['rating']} ★',
-                            style: TextStyle(
-                                fontSize: 16, color: Colors.orange[700]),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Categories: ${supplier['categories'].join(', ')}',
-                            style: TextStyle(
-                                fontSize: 16, color: Colors.grey[700]),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+      ],
+    );
+  }
 
-            // Products Section Title
-            Text(
-              'Products',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-
-            SizedBox(height: 10),
-
-            // Product List
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: supplier['products'].length,
-              itemBuilder: (context, index) {
-                final product = supplier['products'][index];
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 2,
-                  margin: EdgeInsets.symmetric(vertical: 8),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.orange[100],
-                      child: Icon(Icons.local_grocery_store,
-                          color: Colors.orange[700]),
-                    ),
-                    title: Text(product['name']),
-                    subtitle: Text('\$${product['price'].toStringAsFixed(2)}'),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                      // TODO: Navigate to product details or add to cart
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Tapped on ${product['name']}')),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ],
+  Widget _buildProductItem(Product product) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        leading: product.imageUrl != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(product.imageUrl!,
+                    fit: BoxFit.cover, height: 60, width: 60),
+              )
+            : const Icon(Icons.image_not_supported),
+        title: Text(product.name,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
+        trailing: ElevatedButton(
+          onPressed: () {
+            Provider.of<CartProvider>(context, listen: false)
+                .addProduct(product);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('${product.name} added to cart!')),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            backgroundColor: Colors.teal,
+          ),
+          child: const Text('Add'),
         ),
       ),
     );

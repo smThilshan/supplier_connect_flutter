@@ -1,35 +1,32 @@
 class Product {
   final int id;
+  final int supplierId;
   final String name;
   final String? imageUrl;
   final double price;
-  final int supplierId;
 
   Product({
     required this.id,
+    required this.supplierId,
     required this.name,
     this.imageUrl,
     required this.price,
-    required this.supplierId,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
-    return Product(
-      id: json['id'],
-      name: json['name'],
-      imageUrl: json['imageUrl'],
-      price: (json['price'] as num).toDouble(),
-      supplierId: json['supplierId'],
-    );
-  }
+    double parseDouble(dynamic val) {
+      if (val is double) return val;
+      if (val is int) return val.toDouble();
+      if (val is String) return double.tryParse(val) ?? 0.0;
+      return 0.0;
+    }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'imageUrl': imageUrl,
-      'price': price,
-      'supplierId': supplierId,
-    };
+    return Product(
+      id: json['id'] ?? 0,
+      supplierId: json['supplier_id'] ?? 0,
+      name: json['name'] ?? '',
+      imageUrl: json['image_url'],
+      price: parseDouble(json['price']),
+    );
   }
 }
