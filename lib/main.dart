@@ -52,12 +52,6 @@ final GoRouter _router = GoRouter(
         // ),
       ],
     ),
-    // Move /cart here as a top-level route:
-    // GoRoute(
-    //   path: '/cart',
-    //   name: 'cart',
-    //   builder: (context, state) => CartScreen(),
-    // ),
     GoRoute(
       path: '/cart',
       name: 'cart',

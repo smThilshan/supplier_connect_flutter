@@ -112,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         // ⚡️ Show error
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
-                                          SnackBar(
+                                          const SnackBar(
                                               content: Text(
                                                   'Invalid email or password!')),
                                         );
@@ -136,16 +136,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                 ),
-
-                                // child: ElevatedButton(
-                                //   bColor: Theme.of(context).primaryColor,
-                                //   buttonText: "LOGIN",
-                                //   onclick: () {},
-                                //   mfontSize: 15,
-                                // ),
-                                // child: Text("Login panra"),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 15,
                               ),
                               Center(
@@ -154,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     // Navigator.pushNamed(
                                     //     context, SignUpScreen.routeName);
                                   },
-                                  child: Text(
+                                  child: const Text(
                                     "I don't have an account",
                                     style: TextStyle(
                                       color: Colors

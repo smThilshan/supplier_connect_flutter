@@ -85,7 +85,7 @@ class CartScreen extends StatelessWidget {
                       ),
                       Text(
                         '\$${totalAmount.toStringAsFixed(2)}',
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.green),
